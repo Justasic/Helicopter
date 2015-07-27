@@ -1,22 +1,21 @@
 #pragma once
 
 #include <QWidget>
+#include <QMainWindow>
 
-namespace Ui
-{
-        class MainWindow;
-}
+namespace Ui { class MainWindow; };
 
-class MainWidget : public QWidget
+class MainWidget : public QMainWindow
 {
 Q_OBJECT
 
 public:
 	explicit MainWidget(QWidget *parent = 0);
-	~MainWidget();
+	virtual ~MainWidget();
 
+private slots:
 	// Qt slots
-	void pushButton_play_clicked();
+	void on_pushButton_play_clicked();
 
 private:
 	Ui::MainWindow *ui;

@@ -68,16 +68,24 @@ if (NOT HAVE_CXX_11)
 	message(FATAL_ERROR "Your compiler must support C++11!")
 endif (NOT HAVE_CXX_11)
 
+
 # Required for Qt
-set(CMAKE_AUTOMOC ON)
+#set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Qt5Widgets REQUIRED)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR})
 
+# C++11 support enabled.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 #set(CXXFLAGS "${CXXFLAGS} ${CMAKE_CXX_FLAGS}")
+
+# Thanks to this StackOverflow question I managed to get this shit to work the way I want.
+# http://stackoverflow.com/questions/19761767/qt-5-cmake-fails-with-undefined-reference-to-vtable-on-hello-world-with-inc-sr
+qt5_wrap_cpp(QT_UICRAP_HEADER ${CMAKE_SOURCE_DIR}/include/mainwidget.h)
+qt5_wrap_ui(QT_UICRAP_GUI ${CMAKE_SOURCE_DIR}/src/helicopter.ui)
+set(SOURCE_FILES ${SOURCE_FILES} ${QT_UICRAP_HEADER})
 
 set_source_files_properties(${SOURCE_FILES} PROPERTIES LANGUAGE CXX COMPILE_FLAGS "${CXXFLAGS}")
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

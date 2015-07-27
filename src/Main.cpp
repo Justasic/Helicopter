@@ -12,7 +12,7 @@
 
 int main(int argc, char **argv)
 {
-	std::vector args(argv, argv+argc);
+	std::vector<std::string> args(argv, argv+argc);
 
 	// We have a Qt application.
 	QApplication application(argc, argv);
