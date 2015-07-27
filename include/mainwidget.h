@@ -2,6 +2,7 @@
 
 #include <QWidget>
 #include <QMainWindow>
+#include <xmp.h>
 
 // defined in Main.cpp
 extern std::vector<std::string> musicfiles;

@@ -27,7 +27,8 @@ MainWidget::MainWidget(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	ui->tableWidget->setShowGrid(false);
 	ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-	//ui->tableWidget->setGeometry(QApplication::desktop()->screenGeometry());
+	ui->tableWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
 
 	// Insert all the songs.
 	int iter = 0;
@@ -66,8 +67,18 @@ static inline int randint(int min, int max)
 
 void MainWidget::on_pushButton_play_clicked()
 {
+	int row = ui->tableWidget->currentRow();
+	auto item = ui->tableWidget->currentItem();
+	std::string file;
+	if (row <= musicfiles.size())
+	{
+		file = musicfiles[row];
+		printf("Item in musicfiles: %s\n", file.c_str());
+		printf("Item in column: %s\n", ui->tableWidget->item(row, 2)->text().toStdString().c_str());
+	}
+	printf("Item: %s\n", item->text().toStdString().c_str());
 	printf("Woooo! You pushed the play button! :D\n");
-	QMessageBox::information(nullptr, "Button Pushed", "You pushed the play button!");
+	//QMessageBox::information(nullptr, "Button Pushed", "You pushed the play button!");
 }
 
 void MainWidget::on_pushButton_pause_clicked()
