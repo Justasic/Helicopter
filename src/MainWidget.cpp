@@ -39,8 +39,12 @@ MainWidget::MainWidget(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		xmp_test_module(const_cast<char*>(it.c_str()), &info);
 		std::string filename = basename(it);
 
-		// Now set it up in the table.
-		ui->tableWidget->setItem(iter, 0, new QTableWidgetItem(info.name));
+		// Now set it up in the table, make sure there is a title or use the filename instead.
+		if (QString(info.name).isEmpty())
+			ui->tableWidget->setItem(iter, 0, new QTableWidgetItem(filename.c_str()));
+		else
+			ui->tableWidget->setItem(iter, 0, new QTableWidgetItem(info.name));
+
 		ui->tableWidget->setItem(iter, 1, new QTableWidgetItem(info.type));
 		ui->tableWidget->setItem(iter, 2, new QTableWidgetItem(filename.c_str()));
 		iter++;
@@ -102,5 +106,6 @@ void MainWidget::on_pushButton_previous_clicked()
 
 void MainWidget::on_tableWidget_cellDoubleClicked(int row, int column)
 {
-	printf("Cell %d %d selected.\n", row, column);
+	std::string m = musicfiles[row];
+	printf("Cell %d %d selected -> %s\n", row, column, m.c_str());
 }
