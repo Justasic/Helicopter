@@ -16,6 +16,9 @@ public:
 private slots:
 	// Qt slots
 	void on_pushButton_play_clicked();
+	void on_pushButton_pause_clicked();
+	void on_pushButton_next_clicked();
+	void on_pushButton_previous_clicked();
 
 private:
 	Ui::MainWindow *ui;

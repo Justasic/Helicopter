@@ -88,7 +88,7 @@ qt5_wrap_ui(QT_UICRAP_GUI ${CMAKE_SOURCE_DIR}/src/helicopter.ui)
 set(SOURCE_FILES ${SOURCE_FILES} ${QT_UICRAP_HEADER})
 
 set_source_files_properties(${SOURCE_FILES} PROPERTIES LANGUAGE CXX COMPILE_FLAGS "${CXXFLAGS}")
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${QT_UICRAP_GUI})
 
 # Link Qt with the project.
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
