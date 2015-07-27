@@ -15,9 +15,7 @@ bool is_directory(const char *dir)
 	if (stat(dir, &st_buf) != 0)
 		return false;
 
-	if (S_ISDIR(st_buf.st_mode))
-		return true;
-	return false;
+	return S_ISDIR(st_buf.st_mode);
 }
 
 bool is_file(const char *file)
@@ -28,7 +26,5 @@ bool is_file(const char *file)
 	if (stat(file, &st_buf) != 0)
 		return false;
 
-	if (S_ISREG(st_buf.st_mode))
-		return true;
-	return false;
+	return S_ISREG(st_buf.st_mode);
 }
