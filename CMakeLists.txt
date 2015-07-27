@@ -74,6 +74,7 @@ endif (NOT HAVE_CXX_11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Qt5Widgets REQUIRED)
+find_library(xmp REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR})
 
@@ -91,4 +92,4 @@ set_source_files_properties(${SOURCE_FILES} PROPERTIES LANGUAGE CXX COMPILE_FLAG
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${QT_UICRAP_GUI})
 
 # Link Qt with the project.
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets xmp)
