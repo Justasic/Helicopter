@@ -72,6 +72,7 @@ static inline int randint(int min, int max)
 void MainWidget::on_pushButton_play_clicked()
 {
 	int row = ui->tableWidget->currentRow();
+	printf("on_pushButton_play_clicked: %d\n", row);
 	auto item = ui->tableWidget->currentItem();
 	std::string file;
 	if (row <= musicfiles.size())
@@ -93,15 +94,37 @@ void MainWidget::on_pushButton_pause_clicked()
 
 void MainWidget::on_pushButton_next_clicked()
 {
-	printf("Woooo! You pushed the next button! :D %d\n", ui->progressBar->value());
+	// Get the next song according to the list
+	int row = ui->tableWidget->currentRow();
+	printf("on_pushButton_next_clicked: %d\n", row);
+	if (row + 1 > (musicfiles.size()-1))
+		row = 0; // Wrap around to the beginning of the list.
+	else
+		row++;
+
+	std::string nextsong = musicfiles[row];
+	//printf("Woooo! You pushed the next button! :D %d\n", ui->progressBar->value());
+	printf("Next song is: %s\n", nextsong.c_str());
+	ui->tableWidget->selectRow(row);
 	//QMessageBox::information(nullptr, "Button Pushed", "You pushed the next button!");
 	ui->progressBar->setValue(valuecheck(ui->progressBar->value(), randint(1, 10)));
 }
 
 void MainWidget::on_pushButton_previous_clicked()
 {
-	printf("Woooo! You pushed the previous button! :D\n");
-	QMessageBox::information(nullptr, "Button Pushed", "You pushed the previous button!");
+	// Get the previous song according to the list
+	int row = ui->tableWidget->currentRow();
+	printf("on_pushButton_previous_clicked: %d\n", row);
+	if (row - 1 < 0)
+		row = musicfiles.size() - 1; // wrap around to the end of the list.
+	else
+		row--; // otherwise, decrement to the previous song.
+	ui->tableWidget->selectRow(row);
+	std::string nextsong = musicfiles[row];
+
+	//printf("Woooo! You pushed the previous button! :D\n");
+	printf("Previous song is: %s\n", nextsong.c_str());
+	//QMessageBox::information(nullptr, "Button Pushed", "You pushed the previous button!");
 }
 
 void MainWidget::on_tableWidget_cellDoubleClicked(int row, int column)

@@ -37,6 +37,26 @@ file(GLOB SOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp")
 list(APPEND SOURCE_FILES ${LOADER_FILES})
 list(SORT SOURCE_FILES)
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+# Find clang (if the system has it)
+find_program(CLANG clang)
+find_program(CLANGXX clang++)
+
+# prefer clang instead of gcc (or whatever shit compiler they're using) This can be disabled with
+# the NO_CLANG option
+option(NO_CLANG "Don't prefer clang for compilation" OFF)
+if (NOT NO_CLANG)
+	if (CLANG)
+		set(CMAKE_C_COMPILER ${CLANG})
+	endif (CLANG)
+
+	# In case we need to compile C++ in the future (which I doubt we will)
+	if (CLANGXX)
+		set(CMAKE_CXX_COMPILER ${CLANGXX})
+	endif (CLANGXX)
+endif (NOT NO_CLANG)
+
 project(Helicopter CXX)
 # this allows the check_type_size to work without causing cmake to fail.
 enable_language(C)
@@ -68,15 +88,20 @@ if (NOT HAVE_CXX_11)
 	message(FATAL_ERROR "Your compiler must support C++11!")
 endif (NOT HAVE_CXX_11)
 
-
 # Required for Qt
 #set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Qt5Widgets REQUIRED)
+find_package(PulseAudio REQUIRED)
 find_library(xmp REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR})
+
+# Enable color diagnostics when building with Ninja + clang.
+if ("${CMAKE_GENERATOR}" STREQUAL "Ninja" AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+	set(CMAKE_CXX_FLAGS "${CMALE_CXX_FLAGS} -fcolor-diagnostics")
+endif ("${CMAKE_GENERATOR}" STREQUAL "Ninja" AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
 # C++11 support enabled.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -92,4 +117,4 @@ set_source_files_properties(${SOURCE_FILES} PROPERTIES LANGUAGE CXX COMPILE_FLAG
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${QT_UICRAP_GUI})
 
 # Link Qt with the project.
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets xmp)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets xmp pulse)
