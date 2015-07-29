@@ -1,6 +1,10 @@
 #pragma once
 #include <pulse/pulseaudio.h>
 #include <QtCore>
+#include <deque>
+#include "xmp_interface.h"
+
+struct DataBlock;
 
 class Pulseaudio : public QObject
 {
@@ -24,8 +28,19 @@ public:
 	pa_mainloop_api *mainloop_api;
 	pa_mainloop* m;
 
+	// Length of buffer Pulseauido first requested.
+	int bufferlength;
+
+	// XMP player
+	libxmp *player;
+
+	// Unused?
+	std::deque<DataBlock*> AudioData;
+
 	// testable variables
 	bool StreamReady;
 
 	void DoIteration();
+	void DisconnectContext();
+	bool ConnectContext();
 };

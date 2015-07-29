@@ -55,7 +55,6 @@ std::vector<std::string> ScanForTrackerFiles(std::vector<std::string> directorie
 			if (ValidTrackerFile(it))
 				validtrackerfiles.push_back(it);
 		}
-
 	}
 
 	return validtrackerfiles;
@@ -65,52 +64,15 @@ int main(int argc, char **argv)
 {
 	std::vector<std::string> args(argv, argv+argc);
 
-	#if 0
-	libxmp_filelist = const_cast<const char **>(xmp_get_format_list());
-
-	printf("Supported file types:\n");
-	const char **filetypes = libxmp_filelist;
-	const char *typeit = nullptr;
-	while((typeit = *filetypes++))
-	{
-		printf(" %s\n", typeit);
-	}
-
-	struct xmp_test_info info;
-	switch(xmp_test_module(const_cast<char*>(args[1].c_str()), &info))
-	{
-		case -XMP_ERROR_SYSTEM:
-			QMessageBox::information(nullptr, "File Error",
-			                         _("Error opening %s: %s (%d)", args[1], strerror(errno), errno).c_str());
-			break;
-		case -XMP_ERROR_FORMAT:
-			QMessageBox::information(nullptr, "File Error", _("%s is not a valid tracker file!", args[1]).c_str());
-			break;
-		case 0:
-		{
-			char *path = strdup(args[1].c_str());
-			printf("Filename: %s\nSong: %s\nTracker: %s\n", basename(path), info.name, info.type);
-			free(path);
-		}
-		default:
-			break;
-	}
-	#endif
-
-
-
-
-
 	// We have a Qt application.
 	QApplication application(argc, argv);
-	QMessageBox::information(nullptr, "Scanning files...", "Scanning for files, this may take a few minutes...");
+	//QMessageBox::information(nullptr, "Scanning files...", "Scanning for files, this may take a few minutes...");
 	musicfiles = ScanForTrackerFiles(args);
 	tfm::printf("Found %d valid tracker files\n", musicfiles.size());
 
 	// Initialize Pulseaudio
 	pulse = new Pulseaudio();
 	pulse->Initialize();
-
 
 	// Form our widget.
 	MainWidget w;

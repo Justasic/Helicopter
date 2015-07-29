@@ -11,8 +11,11 @@
 #include "mainwidget.h"
 #include "file.h"
 #include "tinyformat.h"
+#include "pulseaudio_interface.h"
 // include our helicopter.ui file.
 #include "ui_helicopter.h"
+
+extern Pulseaudio *pulse;
 
 MainWidget::MainWidget(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -56,17 +59,16 @@ MainWidget::~MainWidget()
 	delete ui;
 }
 
-static inline int valuecheck(int cur, int increment)
+void PlayFile(const std::string &filename)
 {
-	cur += increment;
-	cur %= 100;
-	return cur;
-}
+	// Initialize the player
+	pulse->player->Start();
+	pulse->player->LoadFromFile(filename);
+	pulse->player->SetVolume(100);
+	pulse->player->SetPlaying(true);
 
-static inline int randint(int min, int max)
-{
-	srand(time(NULL));
-	return (rand() % max) + min;
+	// Connect to pulse.
+	pulse->ConnectContext();
 }
 
 void MainWidget::on_pushButton_play_clicked()
@@ -83,13 +85,25 @@ void MainWidget::on_pushButton_play_clicked()
 	}
 	printf("Item: %s\n", item->text().toStdString().c_str());
 	printf("Woooo! You pushed the play button! :D\n");
+	PlayFile(file);
 	//QMessageBox::information(nullptr, "Button Pushed", "You pushed the play button!");
 }
 
 void MainWidget::on_pushButton_pause_clicked()
 {
+	static bool paused = false;
+	paused = !paused;
 	printf("Woooo! You pushed the pause button! :D\n");
-	QMessageBox::information(nullptr, "Button Pushed", "You pushed the pause button!");
+	if (paused)
+	{
+		pulse->ConnectContext();
+	}
+	else
+	{
+		pulse->player->Stop();
+		pulse->DisconnectContext();
+	}
+	//QMessageBox::information(nullptr, "Button Pushed", "You pushed the pause button!");
 }
 
 void MainWidget::on_pushButton_next_clicked()
@@ -103,11 +117,12 @@ void MainWidget::on_pushButton_next_clicked()
 		row++;
 
 	std::string nextsong = musicfiles[row];
+	PlayFile(nextsong);
 	//printf("Woooo! You pushed the next button! :D %d\n", ui->progressBar->value());
 	printf("Next song is: %s\n", nextsong.c_str());
 	ui->tableWidget->selectRow(row);
 	//QMessageBox::information(nullptr, "Button Pushed", "You pushed the next button!");
-	ui->progressBar->setValue(valuecheck(ui->progressBar->value(), randint(1, 10)));
+	//ui->progressBar->setValue(valuecheck(ui->progressBar->value(), randint(1, 10)));
 }
 
 void MainWidget::on_pushButton_previous_clicked()
@@ -122,6 +137,7 @@ void MainWidget::on_pushButton_previous_clicked()
 	ui->tableWidget->selectRow(row);
 	std::string nextsong = musicfiles[row];
 
+	PlayFile(nextsong);
 	//printf("Woooo! You pushed the previous button! :D\n");
 	printf("Previous song is: %s\n", nextsong.c_str());
 	//QMessageBox::information(nullptr, "Button Pushed", "You pushed the previous button!");
@@ -131,4 +147,5 @@ void MainWidget::on_tableWidget_cellDoubleClicked(int row, int column)
 {
 	std::string m = musicfiles[row];
 	printf("Cell %d %d selected -> %s\n", row, column, m.c_str());
+	PlayFile(m);
 }

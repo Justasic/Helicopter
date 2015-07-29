@@ -9,6 +9,24 @@ static pa_sample_spec sample_spec = {
 		.channels = 2
 };
 
+struct DataBlock
+{
+	void *orig;
+	void *data;
+	size_t len;
+
+	DataBlock(void *memblk, size_t len) : len(len)
+	{
+		this->orig = this->data = malloc(len);
+		memcpy(this->data, memblk, len);
+	}
+
+	~DataBlock()
+	{
+		free(this->orig);
+	}
+};
+
 /* Connection draining complete */
 static void context_drain_complete(pa_context*c, void *userdata)
 {
@@ -82,6 +100,36 @@ static void stream_write_callback(pa_stream *s, size_t length, void *userdata)
 		pa_operation_unref(pa_stream_drain(s, stream_drain_complete, pa));
 	}
 	#endif
+
+	printf("Write callback!\n");
+
+	//DataBlock *d = pa->AudioData.front();
+	if (pa->player->GetPlaying())
+	{
+		// Allocate a buffer
+		void *buffer = malloc(length);
+		memset(buffer, 0, length);
+
+		// Copy data into the buffer
+		int status = pa->player->PlayBuffer(buffer, length, 1);
+		printf("Writing %zu byes of playback data to pulseaudio\n", length);
+
+		// Write the buffer to pulseaudio
+		pa_stream_write(s, buffer, (size_t) length, NULL, 0, PA_SEEK_RELATIVE);
+
+		// If that was the end of the song then drain the pulseaudio buffer
+		if (status == -XMP_END)
+		{
+			printf("End if playback for file\n");
+			pa_operation_unref(pa_stream_drain(s, stream_drain_complete, pa));
+			pa->player->SetPlaying(false);
+			pa->player->ReleaseFile();
+		}
+
+		free(buffer);
+	}
+	else
+		pa->bufferlength = length;
 }
 
 /* This routine is called whenever the stream state changes */
@@ -178,11 +226,13 @@ Pulseaudio::~Pulseaudio()
 		pa_signal_done();
 		pa_mainloop_free(this->m);
 	}
+
+	delete this->player;
 }
 
 void Pulseaudio::WriteAudioData(void *data, size_t len)
 {
-	// TODO.
+	this->AudioData.push_back(new DataBlock(data, len));
 }
 
 void Pulseaudio::DoIteration()
@@ -196,6 +246,7 @@ void Pulseaudio::DoIteration()
 bool Pulseaudio::Initialize()
 {
 	printf("Compiled with libpulse %s\nLinked with libpulse %s\n", pa_get_headers_version(), pa_get_library_version());
+	this->player = new libxmp("", 44100);
 
 	assert(pa_sample_spec_valid(&sample_spec));
 	assert(pa_channel_map_parse(&this->channel_map, "left,right"));
@@ -232,10 +283,21 @@ bool Pulseaudio::Initialize()
 
 	pa_context_set_state_callback(this->context, context_state_callback, this);
 
+	return true;
+}
+
+
+bool Pulseaudio::ConnectContext()
+{
 	/* Connect the context */
 	if (pa_context_connect(this->context, this->server, (pa_context_flags_t)0, NULL) < 0) {
 		fprintf(stderr, "pa_context_connect() failed: %s", pa_strerror(pa_context_errno(this->context)));
 		return false;
 	}
 	return true;
+}
+
+void Pulseaudio::DisconnectContext()
+{
+	pa_context_disconnect(this->context);
 }
